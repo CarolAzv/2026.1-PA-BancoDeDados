@@ -1,5 +1,21 @@
-from rest_framework import serializers
 from .models import Cliente, Endereco, FormaPagamento, Vendedor, Item, Pedido, ItemPedido
+from rest_framework import serializers
+from .models import Usuario
+
+class UsuarioSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = Usuario
+        fields = ['id', 'username', 'email', 'password', 'tipo', 'cpf', 'telefone']
+
+    def create(self, validated_data):
+        # create_user faz o hash da senha corretamente
+        senha = validated_data.pop('password')
+        usuario = Usuario(**validated_data)
+        usuario.set_password(senha)
+        usuario.save()
+        return usuario
 
 class ClienteSerializer(serializers.ModelSerializer):
     class Meta:
