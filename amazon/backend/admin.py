@@ -1,8 +1,9 @@
 from django.contrib import admin
-from .models import Cliente
+from .models import Cliente, Vendedor, Produto, PerfilVendedor, Pedido, ItemPedido
 
-@admin.register(Cliente)
-class ClienteAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'email', 'telefone', 'data_cadastro')
-    search_fields = ('nome', 'email')
-    ordering = ('nome',)
+admin.site.register(Cliente)
+admin.site.register(Vendedor)
+admin.site.register(Produto)
+admin.site.register(PerfilVendedor)
+admin.site.register(Pedido)
+admin.site.register(ItemPedido)

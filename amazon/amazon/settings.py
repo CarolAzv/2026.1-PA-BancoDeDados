@@ -47,6 +47,9 @@ INSTALLED_APPS = [
     'backend', # Nossa lógica de negócio
 ]
 
+# Diz ao Django para usar nosso usuário customizado
+AUTH_USER_MODEL = 'backend.Usuario'
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
