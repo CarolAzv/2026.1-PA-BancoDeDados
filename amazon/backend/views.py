@@ -10,8 +10,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 
-from .serializers import ClienteSerializer, UsuarioSerializer, ProdutoSerializer
-from .models import Cliente, Usuario, Produto
+from .serializers import UsuarioSerializer, ProdutoSerializer, EnderecoSerializer, FormaPagamentoSerializer, PedidoSerializer, ItemPedidoSerializer
+from .models import Usuario, Produto, Endereco, FormaPagamento, Pedido, ItemPedido
 from .permissions import IsVendedor
 
 
@@ -30,16 +30,14 @@ class ClienteViewSet(viewsets.ModelViewSet):
     ordering_fields = ['nome', 'data_cadastro'] # ?ordering=-data_cadastro
 
 
-class ProdutoViewSet(viewsets.ModelViewSet):
-    queryset = Produto.objects.all()
-    serializer_class = ProdutoSerializer
-
-    def get_permissions(self):
-        # Qualquer autenticado pode listar/ver; só vendedor escreve
-        if self.action in ['list', 'retrieve']:
-            return [IsAuthenticated()]
-            
-        return [IsAuthenticated(), IsVendedor()]
+lass ProdutoViewSet(viewsets.ModelViewSet):
+ queryset = Produto.objects.all()
+ serializer_class = ProdutoSerializer
+ def get_permissions(self):
+ # Qualquer autenticado pode listar/ver; só vendedor escreve
+ if self.action in ['list', 'retrieve']:
+ return [IsAuthenticated()]
+ return [IsAuthenticated(), IsVendedor()]
 
 
 @api_view(['POST'])
