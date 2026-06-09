@@ -43,53 +43,49 @@ class ClienteSerializer(serializers.ModelSerializer):
 class EnderecoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Endereco
-        fields = '__all__' # Inclui todos os campos do modelo
-        # Para expor apenas alguns campos, use uma lista:
-        # fields = ['id', 'nome', 'email']
-        # Para excluir campos, use:
-        # exclude = ['data_cadastro']
+        fields = '__all__'
 
 class FormaPagamentoSerializer(serializers.ModelSerializer):
     class Meta:
         model = FormaPagamento
-        fields = '__all__' # Inclui todos os campos do modelo
-        # Para expor apenas alguns campos, use uma lista:
-        # fields = ['id', 'nome', 'email']
-        # Para excluir campos, use:
-        # exclude = ['data_cadastro']
+        fields = '__all__'
 
 class VendedorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vendedor
-        fields = '__all__' # Inclui todos os campos do modelo
-        # Para expor apenas alguns campos, use uma lista:
-        # fields = ['id', 'nome', 'email']
-        # Para excluir campos, use:
-        # exclude = ['data_cadastro']
+        fields = '__all__'
 
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
-        fields = '__all__' # Inclui todos os campos do modelo
-        # Para expor apenas alguns campos, use uma lista:
-        # fields = ['id', 'nome', 'email']
-        # Para excluir campos, use:
-        # exclude = ['data_cadastro']
+        fields = '__all__'
 
 class PedidoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pedido
-        fields = '__all__' # Inclui todos os campos do modelo
-        # Para expor apenas alguns campos, use uma lista:
-        # fields = ['id', 'nome', 'email']
-        # Para excluir campos, use:
-        # exclude = ['data_cadastro']
+        fields = '__all__'
 
 class ItemPedidoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ItemPedido
-        fields = '__all__' # Inclui todos os campos do modelo
-        # Para expor apenas alguns campos, use uma lista:
-        # fields = ['id', 'nome', 'email']
-        # Para excluir campos, use:
-        # exclude = ['data_cadastro']
+        fields = '__all__'
+
+class PerfilVendedorSerializer(serializers.ModelSerializer):
+    vendedor_id = serializers.IntegerField(source='vendedor.id')    
+    vendedor_nome = serializers.CharField(source='vendedor.nome', read_only=True) 
+    
+    def validate(self, attrs):
+        vendedor_data = attrs.get('vendedor', {})
+        vendedor_id = vendedor_data.get('id') if isinstance(vendedor_data, dict) else None
+        if vendedor_id is None:
+            raise serializers.ValidationError({'vendedor_id': 'Este campo é obrigatório.'})
+        try:
+            attrs['vendedor'] = Vendedor.objects.get(id=vendedor_id)
+        except Vendedor.DoesNotExist:
+            raise serializers.ValidationError({'vendedor_id': f'Vendedor com id={vendedor_id} não encontrado.'})
+        return attrs
+
+    class Meta:
+        model = PerfilVendedor
+        fields = ['vendedor_id', 'vendedor_nome', 'razao_social','inscricao_estadual', 'banco', 'agencia','conta', 'chave_pix']
+    
