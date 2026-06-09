@@ -30,10 +30,6 @@ class Cliente(models.Model):
     telefone = models.CharField(max_length=15, blank=True)
     data_cadastro = models.DateTimeField(auto_now_add=True) # Preenchido automaticamente
 
-    #class Meta:
-    #    db_table = 'clientes' # Nome explícito da tabela no banco
-    #    ordering = ['nome'] # Ordenação padrão nas consultas
-
     def __str__(self):
         return f"{self.nome} - {self.email} - {self.telefone or 'Sem telefone'}"
 

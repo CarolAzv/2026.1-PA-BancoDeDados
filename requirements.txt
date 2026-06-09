@@ -1,0 +1,7 @@
+Django
+django-filter
+djangorestframework
+Markdown
+psycopg2-binary
+sqlparse
+drf-yasg

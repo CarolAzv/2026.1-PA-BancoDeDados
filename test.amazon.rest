@@ -1,0 +1,38 @@
+@baseUrl = http://127.0.0.1:8000/api
+@token = 49b35c2cbf37106c6f9424bcedcc717b1fd5499d
+
+### 1. Signup — cadastrar novo usuário
+POST {{baseUrl}}/signup/
+Content-Type: application/json
+
+{
+    "username": "joaosilva",
+    "email": "joaosilva@email.com",
+    "password": "joaosilva",
+    "tipo": "CLIENTE",
+    "cpf": "89786756454",
+    "telefone": "(84) 934550716"
+}
+
+
+### 2. Login — autenticar e obter token
+POST {{baseUrl}}/login/
+Content-Type: application/json
+
+{
+    "username": "placidoneto",
+    "password": "placidoneto"
+}
+
+### 2.1 Login — autenticar e obter token
+POST {{baseUrl}}/login/
+Content-Type: application/json
+
+{
+    "username": "joaosilva",
+    "password": "joaosilva"
+}
+
+### 3. Perfil — dados do usuário autenticado (requer token)
+GET {{baseUrl}}/perfil/
+Authorization: Token {{token}}

@@ -6,73 +6,101 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 
-from .serializers import UsuarioSerializer, ProdutoSerializer, EnderecoSerializer, FormaPagamentoSerializer, PedidoSerializer, ItemPedidoSerializer
-from .models import Usuario, Produto, Endereco, FormaPagamento, Pedido, ItemPedido
+from .serializers import (
+    UsuarioSerializer, ClienteSerializer, 
+    VendedorSerializer, PerfilVendedorSerializer, 
+    ProdutoSerializer, EnderecoSerializer, 
+    FormaPagamentoSerializer, PedidoSerializer, 
+    ItemPedidoSerializer, LoginSerializer
+)
+from .models import (
+    Usuario, Cliente, Vendedor, PerfilVendedor, 
+    Produto, Endereco, FormaPagamento, Pedido, 
+    ItemPedido
+)
 from .permissions import IsVendedor
 
 
+class LoginView(TokenObtainPairView):
+    serializer_class = LoginSerializer
+
+class UsuarioViewSet(viewsets.ViewSet):
+
+    def get_permissions(self):
+        if self.action in ('signup', 'login'):
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def signup(self, request):
+        serializer = UsuarioSerializer(data=request.data)
+        if serializer.is_valid():
+            usuario = serializer.save()
+            refresh = RefreshToken.for_user(usuario) # gera o par
+            return Response(
+                {'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'usuario': serializer.data},
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def login(self, request):
+        usuario = get_object_or_404(Usuario, username=request.data.get('username'))
+        if not usuario.check_password(request.data.get('password')):
+            return Response({'detail': 'Credenciais inválidas.'},
+                        status=status.HTTP_400_BAD_REQUEST)
+        refresh = RefreshToken.for_user(usuario)
+        return Response({'refresh': str(refresh),
+                         'access': str(refresh.access_token),
+                         'usuario': UsuarioSerializer(usuario).data})
+
+    def perfil(self, request):
+        return Response({'usuario': request.user.username,
+                         'tipo': request.user.tipo,
+                         'mensagem': f'Autenticado via JWT como {request.user.get_tipo_display()}!'})
+
+
 class ClienteViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet para o modelo Cliente.
-    Fornece automaticamente os endpoints list, create, retrieve,
-    update, partial_update e destroy.
-    """
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
-    # Habilita filtros, busca textual e ordenação via query params
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['nome', 'email'] # ?nome=Maria
-    search_fields = ['nome', 'email'] # ?search=Maria
-    ordering_fields = ['nome', 'data_cadastro'] # ?ordering=-data_cadastro
+    permission_classes = [IsAuthenticated]
 
 
-lass ProdutoViewSet(viewsets.ModelViewSet):
- queryset = Produto.objects.all()
- serializer_class = ProdutoSerializer
- def get_permissions(self):
- # Qualquer autenticado pode listar/ver; só vendedor escreve
- if self.action in ['list', 'retrieve']:
- return [IsAuthenticated()]
- return [IsAuthenticated(), IsVendedor()]
+class VendedorViewSet(viewsets.ModelViewSet):
+    queryset = Vendedor.objects.all()
+    serializer_class = VendedorSerializer
+    permission_classes = [IsAuthenticated]
 
 
-@api_view(['POST'])
-@permission_classes({AllowAny}) # registro é público
-def signup(request):
-    serializer = UsuarioSerializer(data=request.data)
-
-    if serializer.is_valid():
-        usuario = serializer.save() # chama o create() do serializer
-        token = Token.objects.create(user=usuario)
-        return Response({'token': token.key, 'usuario': serializer.data}, status=stauts.HTTP_201_CREATED)
+class ProdutoViewSet(viewsets.ModelViewSet):
+    queryset = Produto.objects.all()
+    serializer_class = ProdutoSerializer
     
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def get_permissions(self):
+        # Qualquer autenticado pode listar/ver; só vendedor escreve
+        if self.action in ['list', 'retrieve']:
+            return [IsAuthenticated()]
+        return [IsAuthenticated(), IsVendedor()]
 
 
-@api_view(['POST'])
-@permission_classes({AllowAny}) # login é público
-def login(request):
-    usuario = get_object_or_404(Usuario, username=request.data.get('username'))
+class PerfilVendedorViewSet(viewsets.ModelViewSet):
+    queryset = PerfilVendedor.objects.select_related('vendedor').all()
+    serializer_class = PerfilVendedorSerializer
 
-    if not usuario.check_password(request.data.get('password')):
-        return Response({'detail': 'Credenciais inválidas.'}, status=status.HTTP_400_BAD_REQUEST)
+class PedidoViewSet(viewsets.ModelViewSet):
+    serializer_class = PedidoSerializer
+    def get_queryset(self):
+        return (Pedido.objects
+                .select_related('cliente')
+                .prefetch_related('itens__produto')
+                .all())
 
-    token, _ = Token.objects.get_or_create(user=usuario)
-    return Response({'token': token.key, 'usuario': UsuarioSerializer(usuario).data})
-
-
-@api_view(['GET'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated]) # exige token válido
-def perfil(request):
-    return Response({
-        'username': request.user.username,
-        'tipo': request.user.tipo,
-        'mensagem': f'Olá, {request.user.username}! 
-        Você é {request.user.get_tipo_display()}.'
-    })
-
+class ItemPedidoViewSet(viewsets.ModelViewSet):
+    queryset = ItemPedido.objects.select_related('pedido', 'produto').all()
+    serializer_class = ItemPedidoSerializer

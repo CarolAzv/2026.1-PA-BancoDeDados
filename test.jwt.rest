@@ -1,0 +1,121 @@
+pytest path/to/test_file.py@baseUrl = http://127.0.0.1:8000
+
+### ============================================================
+### USUÁRIO 1 — Maria (CLIENTE)
+### ============================================================
+
+### 1.1) Cadastrar usuário 1 (signup) — devolve access + refresh
+# @name signup_maria
+POST {{baseUrl}}/api/signup/
+Content-Type: application/json
+
+{
+    "username": "placido_cliente",
+    "email": "placidoneto@email.com",
+    "password": "placido1234",
+    "tipo": "CLIENTE",
+    "cpf": "32145678901",
+    "telefone": "(84) 995234567"
+}
+
+###
+
+### 1.2) Login do usuário 1 via endpoint customizado — devolve access + refresh
+# @name login_maria
+POST {{baseUrl}}/api/login/
+Content-Type: application/json
+
+{
+    "username": "placido_cliente",
+    "password": "placido1234"
+}
+
+###
+
+### 1.3) Login do usuário 1 via SimpleJWT (TokenObtainPairView) — devolve access + refresh + tipo no payload
+# @name login_jwt_maria
+POST {{baseUrl}}/login_jwt/
+Content-Type: application/json
+
+{
+    "username": "maria_cliente",
+    "password": "maria1234"
+}
+
+###
+
+### 1.4) Endpoint protegido com o token de Maria
+GET {{baseUrl}}/api/perfil/
+Authorization: Bearer {{eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgxMDI0MjY5LCJpYXQiOjE3ODEwMjI0NjksImp0aSI6ImZlODM3NGRkMTcyMTQ4Mjc4ZGI1YzYwNWIzOTVhYTQxIiwidXNlcl9pZCI6IjIifQ.xH4DqeOS2PxTPq8AnmtmB1s-QrSJuXiUc1kJchHYDLg}}
+
+###
+
+### 1.5) Renovar o access token de Maria quando expirar
+POST {{baseUrl}}/refresh/
+Content-Type: application/json
+
+{
+    "refresh": "{{eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc4MTA0MzM0NiwiaWF0IjoxNzgwOTU2OTQ2LCJqdGkiOiI2YjQzMTk3ZTU2Yzg0MGE3ODJmNjY0YjIyZTRjNjU4ZSIsInVzZXJfaWQiOiIxIn0.xPpKnsjCuKaUEmVlK7c19KwER5AZSCQQF7_Z9Hrr8tg}}"
+}
+
+###
+
+### ============================================================
+### USUÁRIO 2 — João (VENDEDOR)
+### ============================================================
+
+### 2.1) Cadastrar usuário 2 (signup) — devolve access + refresh
+# @name signup_joao
+POST {{baseUrl}}/api/signup/
+Content-Type: application/json
+
+{
+    "username": "joao_vendedor",
+    "email": "joao@email.com",
+    "password": "joao1234",
+    "tipo": "VENDEDOR",
+    "cpf": "98765432100",
+    "telefone": "(84) 987654321"
+}
+
+###
+
+### 2.2) Login do usuário 2 via endpoint customizado — devolve access + refresh
+# @name login_joao
+POST {{baseUrl}}/api/login/
+Content-Type: application/json
+
+{
+    "username": "joao_vendedor",
+    "password": "joao1234"
+}
+
+###
+
+### 2.3) Login do usuário 2 via SimpleJWT (TokenObtainPairView) — devolve access + refresh + tipo no payload
+# @name login_jwt_joao
+POST {{baseUrl}}/login_jwt/
+Content-Type: application/json
+
+{
+    "username": "joao_vendedor",
+    "password": "joao1234"
+}
+
+###
+
+### 2.4) Endpoint protegido com o token de João
+GET {{baseUrl}}/api/perfil/
+Authorization: Bearer {{eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgxMDI0NTUwLCJpYXQiOjE3ODEwMjI3NTAsImp0aSI6IjFkZTU5NmYwZGE4YzQ5NzQ5MmUzMTU5MmIwMGFlNDg0IiwidXNlcl9pZCI6IjIifQ.T2l5c0la1z0YasWdK9lqPEiVeXE3ONiGyWV6kDcEz1w}}
+
+###
+
+### 2.5) Renovar o access token de João quando expirar
+POST {{baseUrl}}/refresh/
+Content-Type: application/json
+
+{
+    "refresh": "{{login_jwt_joao.response.body.refresh}}"
+}
+
+###

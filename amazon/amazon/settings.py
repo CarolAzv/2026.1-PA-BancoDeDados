@@ -37,15 +37,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    # Aplicativos de terceiros
-    'rest_framework', # Django REST Framewor
-    'rest_framework.authtoken', # tabela de tokens (TokenAuthentication)
-    'django_filters', # Suporte a filtros avançados
-
-    # Aplicativos do projeto
-    'backend', # Nossa lógica de negócio
-]
+    # APPs externos
+    'rest_framework',
+    'drf_yasg',
+    #'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+    # APPs do projeto
+    'backend',
+] 
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
